@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f7;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #1a237e;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 38px;
+            color: #1a237e;
+            letter-spacing: 3px;
+        }
+
+        .logout {
+            position: absolute;
+            right: 20px;
+            top: 25px;
+        }
+
+        .logout a {
+            text-decoration: none;
+            background: #1a237e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* MAIN CARD */
+        .container {
+            width: 85%;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 25px rgba(0,0,0,0.1);
+        }
+
+        .hall-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .count-box {
+            margin: 15px 0;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #069ed1;
+            color: white;
+        }
+
+        /* KEEPING YOUR ORIGINAL ALTERNATE COLORS */
+        tr:nth-child(odd) {
+            background-color: #e6f2ff;
+        }
+
+        tr:nth-child(even) {
+            background-color: white;
+        }
+
+        /* Present & Absent styling */
+        tr.present {
+            border-left: 8px solid green;
+        }
+
+        tr.absent {
+            border-left: 8px solid red;
+            background-color: #f8d7da !important;
+        }
+
+        tr:hover {
+            cursor: pointer;
+            transform: scale(1.01);
+            transition: 0.2s ease;
+        }
+
+        /* Status Badge */
+        .status-pill {
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .present-pill {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .absent-pill {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Submit Button */
+        .submit-btn {
+            margin-top: 20px;
+            padding: 12px 25px;
+            border-radius: 25px;
+            background: linear-gradient(to right, #0a88b5, #1ec0e8);
+            border: none;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+	<img style="width:500px;" src="https://webstream.sastra.edu/sastrapwi/images/SASTRA-New-Logo.png">
+    </div>
+</div>
+
+<div class="container">
+
+    <div class="hall-title">
+        Hall No: <span style="color:#069ed1;">{{ hall.hall_no }}</span>
+    </div>
+
+    <div class="count-box">
+        Present: <span id="presentCount">0</span> |
+        Absent: <span id="absentCount">0</span>
+    </div>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <table>
+            <tr>
+                <th>Register No</th>
+                <th>Student Name</th>
+                <th>Exam</th>
+                <th>Status</th>
+            </tr>
+
+            {% for student in students %}
+            <tr class="{% if student.status == 'Absent' %}absent{% else %}present{% endif %}"
+                onclick="toggleStatus('{{ student.reg_no }}', this)">
+
+                <td>{{ student.reg_no }}</td>
+                <td>{{ student.name }}</td>
+                <td>{{ student.exam }}</td>
+                <td id="status_text_{{ student.reg_no }}">
+                    <span class="status-pill {% if student.status == 'Absent' %}absent-pill{% else %}present-pill{% endif %}">
+                        {{ student.status }}
+                    </span>
+                </td>
+
+                <input type="hidden"
+                       class="att-status"
+                       name="{{ student.reg_no }}"
+                       id="status_{{ student.reg_no }}"
+                       value="{{ student.status }}">
+            </tr>
+            {% endfor %}
+        </table>
+
+        <button type="submit" class="submit-btn">Submit Attendance</button>
+    </form>
+
+</div>
+
+<script>
+    function updateCounts() {
+        let present = 0;
+        let absent = 0;
+
+        let inputs = document.querySelectorAll(".att-status");
+
+        inputs.forEach(input => {
+            if (input.value === "Present") present++;
+            else absent++;
+        });
+
+        document.getElementById("presentCount").innerHTML = present;
+        document.getElementById("absentCount").innerHTML = absent;
+    }
+
+    function toggleStatus(regNo, row) {
+        let hiddenInput = document.getElementById("status_" + regNo);
+        let statusText = document.getElementById("status_text_" + regNo);
+
+        if (hiddenInput.value === "Present") {
+            hiddenInput.value = "Absent";
+            statusText.innerHTML = '<span class="status-pill absent-pill">Absent</span>';
+            row.className = "absent";
+        } else {
+            hiddenInput.value = "Present";
+            statusText.innerHTML = '<span class="status-pill present-pill">Present</span>';
+            row.className = "present";
+        }
+
+        updateCounts();
+    }
+
+    updateCounts();
+</script>
+
+</body>
+</html>

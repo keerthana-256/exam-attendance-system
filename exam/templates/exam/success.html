@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Submitted</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f7;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #1a237e;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 38px;
+            color: #1a237e;
+            letter-spacing: 3px;
+        }
+
+        /* CARD */
+        .container {
+            width: 500px;
+            margin: 80px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 25px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+
+        /* SUCCESS ICON */
+        .checkmark {
+            font-size: 70px;
+            color: #28a745;
+            margin-bottom: 20px;
+            animation: pop 0.5s ease-in-out;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .message {
+            font-size: 20px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .subtext {
+            color: #555;
+            margin-bottom: 25px;
+        }
+
+        /* BUTTON */
+        .btn {
+            display: inline-block;
+            padding: 12px 25px;
+            border-radius: 25px;
+            background: linear-gradient(to right, #0a88b5, #1ec0e8);
+            color: white;
+            text-decoration: none;
+            font-size: 15px;
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <img style="width:500px;" src="https://webstream.sastra.edu/sastrapwi/images/SASTRA-New-Logo.png">
+</div>
+
+<div class="container">
+
+    <div class="checkmark">✔
+</div>
+
+    <div class="message">
+        Attendance Submitted Successfully!
+    </div>
+
+    <div class="subtext">
+        The attendance has been recorded 
+    </div>
+
+    <a href="{% url 'invigilator_dashboard' %}" class="btn">
+        Back to Dashboard
+    </a>
+    <a href="{% url 'invigilator_login' %}" class="btn login-btn">
+            Back to Login
+    </a>
+
+</div>
+
+</body>
+</html>

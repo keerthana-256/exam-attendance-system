@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Section-wise Absentees</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: white;
+            position: relative;
+            border-bottom: 3px solid #1a237e;
+        }
+
+        .header img {
+            width: 450px;
+        }
+
+        .logout-btn {
+            position: absolute;
+            right: 20px;
+            top: 25px;
+            text-decoration: none;
+            background: #1a237e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* MAIN CARD */
+        .container {
+            width: 90%;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 4px 25px rgba(0,0,0,0.2);
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #0a88b5, #24b1d4);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        .exam-info {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 15px;
+            color: #555;
+        }
+
+        /* SECTION BLOCK */
+        .section-block {
+            margin-bottom: 40px;
+        }
+
+        .section-header {
+            background: linear-gradient(to right, #1a237e, #3949ab);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-weight: bold;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .badge {
+            background: white;
+            color: #1a237e;
+            padding: 4px 10px;
+            border-radius: 15px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 12px;
+        }
+
+        th {
+            background: #0a88b5;
+            color: white;
+            padding: 10px;
+            text-align: center;
+        }
+
+        td {
+            padding: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f9ff;
+        }
+
+        tr:hover {
+            background-color: #e3f2fd;
+        }
+
+        .no-data {
+            text-align: center;
+            font-style: italic;
+            color: #888;
+            margin-top: 20px;
+        }
+
+        .back-btn {
+            display: block;
+            width: 220px;
+            margin: 30px auto 0 auto;
+            text-align: center;
+            padding: 10px;
+            background: linear-gradient(to right, #0a88b5, #24b1d4);
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 15px;
+        }
+
+        .back-btn:hover {
+            opacity: 0.9;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+<div class="header">
+    <img src="https://webstream.sastra.edu/sastrapwi/images/SASTRA-New-Logo.png">
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="container">
+
+    <div class="title-bar">
+        SECTION-WISE ABSENTEES REPORT
+    </div>
+
+    <div class="exam-info">
+        <strong>Exam:</strong> {{ exam.subject }} |
+        {{ exam.date }} |
+        {{ exam.session }}
+    </div>
+
+    {% for section, students in section_data.items %}
+        <div class="section-block">
+
+            <div class="section-header">
+                {{ section }}
+                <span class="badge">
+                    {{ students|length }} Absentees
+                </span>
+            </div>
+
+            <table>
+                <tr>
+                    <th>Register No</th>
+                    <th>Student Name</th>
+                    <th>Hall</th>
+                </tr>
+
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.reg_no }}</td>
+                    <td>{{ student.name }}</td>
+                    <td>{{ student.hall.hall_no }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+
+        </div>
+    {% empty %}
+        <div class="no-data">
+            No absentees for this exam.
+        </div>
+    {% endfor %}
+
+    <a href="{% url 'admin_dashboard' %}" class="back-btn">
+        Back to Admin Dashboard
+    </a>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Select Hall</title>
+</head>
+<body>
+
+<form method="post">
+    {% csrf_token %}
+    <select name="exam" required>
+        <option value="">-- Select Exam --</option>
+        {% for exam in exams %}
+            <option value="{{ exam.id }}">{{ exam.subject }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">Load Halls</button>
+</form>
+
+{% if halls %}
+    <h3>Select Hall</h3>
+    <ul>
+        {% for hall in halls %}
+            <li>
+                {{ hall.hall_no }} —
+                <a href="{% url 'takeAttendance' hall.id %}">Take Attendance</a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+</body>
+</html>

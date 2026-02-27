@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Admin Dashboard</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #eef2f7;
+        }
+
+        /* HEADER */
+        .header {
+            background: white;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 3px solid #1a237e;
+            position: relative;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 38px;
+            color: #1a237e;
+            letter-spacing: 3px;
+        }
+
+        .logout {
+            position: absolute;
+            right: 20px;
+            top: 25px;
+        }
+
+        .logout a {
+            text-decoration: none;
+            background: #1a237e;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+
+        /* MAIN CARD */
+        .container {
+            width: 90%;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0px 6px 25px rgba(0,0,0,0.1);
+        }
+
+        .title {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 20px;
+        }
+
+        /* FILTER */
+        .filter-box {
+            margin-bottom: 20px;
+        }
+
+        select {
+            padding: 8px 12px;
+            border-radius: 5px;
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 8px 15px;
+            border-radius: 20px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .export-btn {
+            background: linear-gradient(to right, #0a88b5, #1ec0e8);
+        }
+
+        .absentee-btn {
+            background: linear-gradient(to right, #c62828, #ef5350);
+        }
+
+        .btn:hover {
+            opacity: 0.9;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th {
+            background-color: #069ed1;
+            color: white;
+            padding: 10px;
+        }
+
+        td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: center;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f4f9ff;
+        }
+
+        tr:hover {
+            background-color: #e1f5fe;
+        }
+
+        .present {
+            color: green;
+            font-weight: bold;
+        }
+
+        .absent {
+            color: red;
+            font-weight: bold;
+        }
+
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <img style="width:500px;" src="https://webstream.sastra.edu/sastrapwi/images/SASTRA-New-Logo.png">
+</div>
+
+<div class="container">
+
+    <div class="title">
+        Admin Dashboard – Attendance Overview
+    </div>
+
+    <!-- FILTER -->
+    <div class="filter-box">
+        <form method="get">
+            <label>Select Exam: </label>
+            <select name="exam" onchange="this.form.submit()">
+                <option value="">All Exams</option>
+                {% for exam in exams %}
+                    <option value="{{ exam.id }}"
+                        {% if exam.id|stringformat:"s" == selected_exam_id %}
+                            selected
+                        {% endif %}
+                    >
+                        {{ exam.subject }} | {{ exam.date }} | {{ exam.session }}
+                    </option>
+                {% endfor %}
+            </select>
+        </form>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    {% if selected_exam_id %}
+        <a href="{% url 'export_attendance_excel' selected_exam_id %}"
+           class="btn export-btn">
+            Export to Excel
+        </a>
+    {% endif %}
+
+    {% if selected_exam_id %}
+    <a href="{% url 'section_absentees' selected_exam_id %}">
+        View Section Absentees
+    </a>
+{% endif %}
+
+    <!-- TABLE -->
+    <table>
+        <tr>
+            <th>Register No</th>
+            <th>Name</th>
+            <th>Hall</th>
+            <th>Exam</th>
+            <th>Status</th>
+        </tr>
+
+        {% for record in records %}
+        <tr>
+            <td>{{ record.student.reg_no }}</td>
+            <td>{{ record.student.name }}</td>
+            <td>{{ record.student.hall.hall_no }}</td>
+            <td>{{ record.student.exam.subject }}</td>
+            <td class="{% if record.status == 'Present' %}present{% else %}absent{% endif %}">
+                {{ record.status }}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Invigilator Login</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f2f2f2;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px;
+            background: white;
+        }
+
+        .header h1 {
+            color: #1a237e;
+            letter-spacing: 3px;
+            margin: 0;
+        }
+
+        .login-box {
+            width: 420px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0px 4px 20px rgba(0,0,0,0.2);
+            padding: 30px;
+        }
+
+        .title-bar {
+            background: linear-gradient(to right, #0a88b5, #24b1d4);
+            color: white;
+            padding: 12px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 10px;
+            margin-bottom: 25px;
+            font-size: 18px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+        }
+
+        label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #444;
+        }
+
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-bottom: 2px solid #ccc;
+            font-size: 15px;
+            outline: none;
+        }
+
+        input:focus {
+            border-bottom: 2px solid #0a88b5;
+        }
+
+        /* CAPTCHA styling */
+        .captcha {
+            margin-top: 10px;
+        }
+
+        .captcha img {
+            margin-top: 5px;
+            border: 1px solid #ccc;
+	    width: 40%
+        }
+
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(to right, #0a88b5, #24b1d4);
+            border: none;
+            padding: 12px;
+            border-radius: 25px;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        .submit-btn:hover {
+            opacity: 0.9;
+        }
+
+        .error {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .footer-text {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #888;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <img style="width:500px;" src="https://webstream.sastra.edu/sastrapwi/images/SASTRA-New-Logo.png">
+</div>
+
+<div class="login-box">
+
+    <div class="title-bar">
+        INVIGILATOR LOGIN
+    </div>
+
+    {% if error %}
+        <div class="error">{{ error }}</div>
+    {% endif %}
+
+    <form method="POST">
+        {% csrf_token %}
+
+        <div class="form-group">
+            {{ form.username.label_tag }} 
+	    {{ form.username }}
+        </div>
+
+        <div class="form-group">
+            {{ form.password.label_tag }} 
+	    {{ form.password }}
+        </div>
+
+        <div class="form-group captcha">
+            <label>Enter Captcha</label>
+            {{ form.captcha }}
+        </div>
+
+        <button type="submit" class="submit-btn">Submit</button>
+
+    </form>
+
+</div>
+
+</body>
+</html>
