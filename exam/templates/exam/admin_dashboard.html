@@ -10,7 +10,6 @@
             background: #eef2f7;
         }
 
-        /* HEADER */
         .header {
             background: white;
             text-align: center;
@@ -41,7 +40,6 @@
             font-size: 14px;
         }
 
-        /* MAIN CARD */
         .container {
             width: 90%;
             margin: 40px auto;
@@ -57,7 +55,6 @@
             margin-bottom: 20px;
         }
 
-        /* FILTER */
         .filter-box {
             margin-bottom: 20px;
         }
@@ -67,7 +64,6 @@
             border-radius: 5px;
         }
 
-        /* BUTTONS */
         .btn {
             padding: 8px 15px;
             border-radius: 20px;
@@ -89,7 +85,6 @@
             opacity: 0.9;
         }
 
-        /* TABLE */
         table {
             width: 100%;
             border-collapse: collapse;
@@ -141,7 +136,6 @@
         Admin Dashboard – Attendance Overview
     </div>
 
-    <!-- FILTER -->
     <div class="filter-box">
         <form method="get">
             <label>Select Exam: </label>
@@ -160,7 +154,7 @@
         </form>
     </div>
 
-    <!-- ACTION BUTTONS -->
+
     {% if selected_exam_id %}
         <a href="{% url 'export_attendance_excel' selected_exam_id %}"
            class="btn export-btn">
@@ -174,7 +168,6 @@
     </a>
 {% endif %}
 
-    <!-- TABLE -->
     <table>
         <tr>
             <th>Register No</th>

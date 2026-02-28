@@ -18,10 +18,6 @@ from .models import (
 import openpyxl
 from datetime import datetime
 
-
-# ===============================
-# INVIGILATOR LOGIN
-# ===============================
 from .forms import LoginForm
 
 def invigilator_login(request):
@@ -49,9 +45,6 @@ def invigilator_login(request):
 
     return render(request, 'exam/invigilator_login.html', {'form': form})
 
-# ===============================
-# ADMIN LOGIN
-# ===============================
 def admin_login(request):
 
     if request.method == "POST":
@@ -70,10 +63,6 @@ def admin_login(request):
 
     return render(request, 'exam/admin_login.html')
 
-
-# ===============================
-# INVIGILATOR DASHBOARD
-# ===============================
 @login_required
 def invigilator_dashboard(request):
     invigilator = get_object_or_404(Invigilator, user=request.user)
@@ -83,10 +72,6 @@ def invigilator_dashboard(request):
         'halls': halls
     })
 
-
-# ===============================
-# TAKE ATTENDANCE
-# ===============================
 @login_required
 def takeAttendance(request, hall_id):
 
@@ -133,17 +118,10 @@ def takeAttendance(request, hall_id):
         'hall': hall
     })
 
-
-# ===============================
-# SUCCESS PAGE
-# ===============================
 def success(request):
     return render(request, 'exam/success.html')
 
 
-# ===============================
-# ADMIN DASHBOARD
-# ===============================
 @staff_member_required
 def admin_dashboard(request):
 
@@ -166,9 +144,6 @@ def admin_dashboard(request):
     })
 
 
-# ===============================
-# SECTION-WISE ABSENTEES (TABLE ONLY)
-# ===============================
 @staff_member_required
 def section_wise_absentees(request, exam_id):
 
@@ -196,9 +171,6 @@ def section_wise_absentees(request, exam_id):
     })
 
 
-# ===============================
-# EXPORT ATTENDANCE EXCEL
-# ===============================
 @staff_member_required
 def export_attendance_excel(request, exam_id):
 
@@ -233,10 +205,6 @@ def export_attendance_excel(request, exam_id):
     wb.save(response)
     return response
 
-
-# ===============================
-# UPLOAD STUDENTS FROM EXCEL
-# ===============================
 @staff_member_required
 def upload_students(request):
 
