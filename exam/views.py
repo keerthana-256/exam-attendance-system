@@ -254,10 +254,11 @@ def upload_students(request):
 
     return render(request, 'exam/upload.html')
 
-from django.http import HttpResponse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 def create_admin(request):
+    User = get_user_model()
+
     if not User.objects.filter(username="Keerthana").exists():
         User.objects.create_superuser(
             username="Keerthana",
