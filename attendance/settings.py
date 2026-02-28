@@ -82,7 +82,7 @@ import os
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=os.environ.get('postgresql://exam_attendance_db_user:SHvX8334IRrdVbUZ86lCgGxbup8GujQK@dpg-d6hce0c50q8c73agk4ug-a/exam_attendance_db')
+        default=os.environ.get('DATABASE_URL')
     )
 }
 
@@ -123,3 +123,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+from django.contrib.auth import get_user_model
+
+if os.environ.get("RENDER"):
+    User = get_user_model()
+    if not User.objects.filter(username="admin").exists():
+        User.objects.create_superuser("Keerthana", "127003181@sastra.ac.in", "keerthana@256")
