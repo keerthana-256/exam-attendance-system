@@ -253,3 +253,17 @@ def upload_students(request):
         return redirect('admin_dashboard')
 
     return render(request, 'exam/upload.html')
+
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+
+def create_admin(request):
+    if not User.objects.filter(username="Keerthana").exists():
+        User.objects.create_superuser(
+            username="Keerthana",
+            email="127003181@sastra.ac.in",
+            password="keerthana@256"
+        )
+        return HttpResponse("Admin Created Successfully")
+
+    return HttpResponse("Admin Already Exists")

@@ -14,6 +14,7 @@ urlpatterns = [
          name='takeAttendance'),
 
     path('success/', views.success, name='success'),
+    path('create-admin/', views.create_admin, name='create_admin'),
 
     path('section-absentees/<int:exam_id>/',
          views.section_wise_absentees,
