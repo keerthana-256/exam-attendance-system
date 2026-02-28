@@ -186,7 +186,11 @@
             {% endfor %}
         </table>
 
-        <button type="submit" class="submit-btn">Submit Attendance</button>
+        {% if not is_locked %}
+    		<button type="submit">Submit Attendance</button>
+	{% else %}
+    		<button disabled style="background:grey;">Attendance Locked</button>
+	{% endif %}
     </form>
 
 </div>

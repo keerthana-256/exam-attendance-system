@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Attendance Locked</title>
+    <style>
+        body {
+            font-family: Arial;
+            text-align: center;
+            padding: 80px;
+        }
+        .box {
+            background: #ffe6e6;
+            padding: 40px;
+            border-radius: 12px;
+            display: inline-block;
+        }
+        h2 {
+            color: red;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Attendance Locked</h2>
+        <p>Attendance can only be marked within 30 minutes of exam start time.</p>
+        <p>Hall: {{ hall.hall_no }}</p>
+        <p>Exam: {{ exam.subject }}</p>
+        <br>
+        <a href="{% url 'invigilator_dashboard' %}">Back to Dashboard</a>
+    </div>
+</body>
+</html>

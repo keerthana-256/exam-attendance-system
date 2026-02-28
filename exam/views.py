@@ -4,6 +4,9 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
+from django.utils import timezone
+from datetime import datetime, timedelta
+
 from .models import (
     Year,
     Branch,
@@ -76,12 +79,31 @@ def invigilator_dashboard(request):
 def takeAttendance(request, hall_id):
 
     hall = get_object_or_404(Hall, id=hall_id)
+    exam = hall.exam
 
-    # Restrict invigilator to assigned halls
+    if exam.start_time:
+        exam_datetime = datetime.combine(exam.date, exam.start_time)
+        exam_datetime = timezone.make_aware(exam_datetime)
+        lock_time = exam_datetime + timedelta(minutes=30)
+        is_locked = timezone.now() > lock_time
+    else:
+        is_locked = False
+
+    lock_time = exam_datetime + timedelta(minutes=30)
+
+    is_locked = timezone.now() > lock_time
+
+
     if not request.user.is_staff:
         invigilator = get_object_or_404(Invigilator, user=request.user)
         if hall not in invigilator.halls.all():
             return redirect('invigilator_dashboard')
+
+        if is_locked:
+            return render(request, 'exam/attendance_locked.html', {
+                'hall': hall,
+                'exam': exam
+            })
 
     students_qs = Student.objects.filter(hall=hall)
 
@@ -102,7 +124,7 @@ def takeAttendance(request, hall_id):
             "status": attendance_map.get(s.id, "Present")
         })
 
-    if request.method == "POST":
+    if request.method == "POST" and not is_locked:
         for s in students_qs:
             status = request.POST.get(s.reg_no, "Present")
 
@@ -115,9 +137,9 @@ def takeAttendance(request, hall_id):
 
     return render(request, 'exam/takeAttendance.html', {
         'students': students,
-        'hall': hall
+        'hall': hall,
+        'is_locked': is_locked
     })
-
 def success(request):
     return render(request, 'exam/success.html')
 

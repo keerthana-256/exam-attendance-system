@@ -22,13 +22,6 @@ class Section(models.Model):
     def __str__(self):
         return f"{self.year} - {self.branch} - {self.section_name}"
 
-class Hall(models.Model):
-    hall_no = models.CharField(max_length=20)
-
-    def __str__(self):
-        return self.hall_no
-
-
 class Exam(models.Model):
 
     SESSION_CHOICES = [
@@ -47,9 +40,18 @@ class Exam(models.Model):
     )
 
     start_time = models.TimeField(null=True, blank=True)
-    end_time = models.TimeField(null=True, blank=True)
     def __str__(self):
         return f"{self.subject} - {self.date} - {self.session}"
+
+
+
+class Hall(models.Model):
+    hall_no = models.CharField(max_length=20)
+    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.hall_no
+
 
 class Student(models.Model):
     reg_no = models.CharField(max_length=20)
