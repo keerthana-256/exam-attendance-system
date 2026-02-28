@@ -47,8 +47,12 @@ class Exam(models.Model):
 
 class Hall(models.Model):
     hall_no = models.CharField(max_length=20)
-    exam = models.ForeignKey(Exam, on_delete=models.CASCADE)
-
+    exam = exam = models.ForeignKey(
+        Exam,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True
+    )
     def __str__(self):
         return self.hall_no
 
