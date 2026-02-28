@@ -1,4 +1,5 @@
 asgiref==3.11.0
+dj-database-url==3.1.2
 Django==6.0.1
 django-ranged-response==0.2.0
 django-simple-captcha==0.6.3
