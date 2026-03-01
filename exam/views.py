@@ -79,8 +79,22 @@ def invigilator_dashboard(request):
 def takeAttendance(request, hall_id):
 
     hall = get_object_or_404(Hall, id=hall_id)
-    exam = hall.exam
 
+    # Get students of this hall
+    students_qs = Student.objects.filter(hall=hall)
+
+    # If no students assigned
+    if not students_qs.exists():
+        return render(request, 'exam/takeAttendance.html', {
+            'students': [],
+            'hall': hall,
+            'is_locked': False
+        })
+
+    # Get exam from first student
+    exam = students_qs.first().exam
+
+    # Lock logic
     if exam.start_time:
         exam_datetime = datetime.combine(exam.date, exam.start_time)
         exam_datetime = timezone.make_aware(exam_datetime)
@@ -89,13 +103,10 @@ def takeAttendance(request, hall_id):
     else:
         is_locked = False
 
-    lock_time = exam_datetime + timedelta(minutes=30)
-
-    is_locked = timezone.now() > lock_time
-
-
+    # Invigilator permission check
     if not request.user.is_staff:
         invigilator = get_object_or_404(Invigilator, user=request.user)
+
         if hall not in invigilator.halls.all():
             return redirect('invigilator_dashboard')
 
@@ -105,8 +116,7 @@ def takeAttendance(request, hall_id):
                 'exam': exam
             })
 
-    students_qs = Student.objects.filter(hall=hall)
-
+    # Existing attendance
     existing = Attendance.objects.filter(student__in=students_qs)
 
     attendance_map = {
@@ -124,6 +134,7 @@ def takeAttendance(request, hall_id):
             "status": attendance_map.get(s.id, "Present")
         })
 
+    # Save attendance
     if request.method == "POST" and not is_locked:
         for s in students_qs:
             status = request.POST.get(s.reg_no, "Present")
