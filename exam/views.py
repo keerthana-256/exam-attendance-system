@@ -257,20 +257,36 @@ def upload_students(request):
             if isinstance(date, datetime):
                 date = date.date()
 
-            year = Year.objects.get(year_name__iexact=str(year_name).strip())
-            branch = Branch.objects.get(branch_name__iexact=str(branch_name).strip())
-            section = Section.objects.get(
-                section_name__iexact=str(section_name).strip(),
+            # Create or get Year
+            year, _ = Year.objects.get_or_create(
+                year_name=str(year_name).strip()
+            )
+
+            # Create or get Branch
+            branch, _ = Branch.objects.get_or_create(
+                branch_name=str(branch_name).strip()
+            )
+
+            # Create or get Section
+            section, _ = Section.objects.get_or_create(
+                section_name=str(section_name).strip(),
                 year=year,
                 branch=branch
             )
-            hall = Hall.objects.get(hall_no__iexact=str(hall_name).strip())
-            exam = Exam.objects.get(
-                subject__iexact=str(subject).strip(),
-                date=date,
-                session__iexact=str(session).strip()
+
+            # Create or get Hall
+            hall, _ = Hall.objects.get_or_create(
+                hall_no=str(hall_name).strip()
             )
 
+            # Create or get Exam
+            exam, _ = Exam.objects.get_or_create(
+                subject=str(subject).strip(),
+                date=date,
+                session=str(session).strip()
+            )
+
+            # Create or update Student
             Student.objects.update_or_create(
                 reg_no=str(reg_no).strip(),
                 defaults={
