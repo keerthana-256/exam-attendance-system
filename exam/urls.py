@@ -18,4 +18,5 @@ urlpatterns = [
     path('export/<int:exam_id>/', views.export_attendance_excel, name='export_attendance_excel'),
 
     path('upload/', views.upload_students, name='upload_students'),
+    path('upload_invigilators/', views.upload_invigilators, name='upload_invigilators'),
 ]

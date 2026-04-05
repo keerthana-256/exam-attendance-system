@@ -3,7 +3,12 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-
+import openpyxl
+from datetime import datetime
+from django.contrib.auth.models import User
+from django.shortcuts import render
+from django.http import HttpResponse
+from .models import Invigilator, HallAssignment
 from django.utils import timezone
 from datetime import datetime, timedelta
 
@@ -317,3 +322,60 @@ def create_admin(request):
         return HttpResponse("Admin Created Successfully")
 
     return HttpResponse("Admin Already Exists")
+
+from django.contrib.admin.views.decorators import staff_member_required
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User
+import openpyxl
+from datetime import datetime
+from .models import Invigilator, HallAssignment
+
+
+@staff_member_required
+def upload_invigilators(request):
+
+    if request.method == "POST":
+
+        file = request.FILES['file']
+        wb = openpyxl.load_workbook(file)
+        ws = wb.active
+
+        for row in ws.iter_rows(min_row=2, values_only=True):
+
+            if not row or not row[0]:
+                continue
+
+            username, hall, date, session = row
+
+            # Convert Excel datetime to date
+            if isinstance(date, datetime):
+                date = date.date()
+
+            username = str(username).strip()
+
+            # Get User (VERY IMPORTANT)
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                print(f"User {username} not found, skipping...")
+                continue
+
+            # Create or get Invigilator
+            invigilator, _ = Invigilator.objects.get_or_create(
+                user=user,
+                defaults={'name': user.first_name or user.username}
+            )
+
+            # Create Hall Assignment
+            HallAssignment.objects.update_or_create(
+                invigilator=invigilator,
+                date=date,
+                session=str(session).strip(),
+                defaults={
+                    'hall': str(hall).strip()
+                }
+            )
+
+        return redirect('admin_dashboard')
+
+    return render(request, 'exam/upload_invigilators.html')

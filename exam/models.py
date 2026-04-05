@@ -83,9 +83,27 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.student.reg_no} - {self.status}"
 
+from django.contrib.auth.models import User
+
+from django.db import models
+from django.contrib.auth.models import User
+
+
+# Invigilator linked to Django User
 class Invigilator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    halls = models.ManyToManyField(Hall)
+    name = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
-        return self.user.username
+        return self.name if self.name else self.user.username
+
+
+# Hall assignment model
+class HallAssignment(models.Model):
+    invigilator = models.ForeignKey(Invigilator, on_delete=models.CASCADE)
+    hall = models.CharField(max_length=50)
+    date = models.DateField()
+    session = models.CharField(max_length=10)  # FN / AN
+
+    def __str__(self):
+        return f"{self.invigilator} - {self.hall} ({self.date} {self.session})"

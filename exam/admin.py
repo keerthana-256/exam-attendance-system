@@ -75,7 +75,8 @@ class AttendanceAdmin(admin.ModelAdmin):
 
     search_fields = ['student__reg_no', 'student__name']
 
-@admin.register(Invigilator)
-class InvigilatorAdmin(admin.ModelAdmin):
-    list_display = ['user']
-    filter_horizontal = ['halls']
+from django.contrib import admin
+from .models import Invigilator, HallAssignment
+
+admin.site.register(Invigilator)
+admin.site.register(HallAssignment)
