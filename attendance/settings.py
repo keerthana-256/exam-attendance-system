@@ -61,23 +61,11 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'attendance.wsgi.application'
 
-# Database (Railway PostgreSQL + fallback to SQLite)
-import os
-import dj_database_url
+DATABASES = {
+    'default': dj_database_url.config(default='sqlite:///db.sqlite3')
+}
 
-if os.environ.get("DATABASE_URL"):
-    # Railway (Production)
-    DATABASES = {
-        'default': dj_database_url.parse(os.environ.get("DATABASE_URL"))
-    }
-else:
-    # Local (SQLite)
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
-    }# Password validation
+# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},

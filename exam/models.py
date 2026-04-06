@@ -8,11 +8,13 @@ class Year(models.Model):
     def __str__(self):
         return self.year_name
 
+
 class Branch(models.Model):
     branch_name = models.CharField(max_length=50)
 
     def __str__(self):
         return self.branch_name
+
 
 class Section(models.Model):
     section_name = models.CharField(max_length=10)
@@ -22,31 +24,27 @@ class Section(models.Model):
     def __str__(self):
         return f"{self.year} - {self.branch} - {self.section_name}"
 
-class Exam(models.Model):
 
+class Exam(models.Model):
     SESSION_CHOICES = [
         ('Session 1', 'Session 1'),
         ('Session 2', 'Session 2'),
-	('Session 3', 'Session 3'),
-	('Session 4', 'Session 4')
+        ('Session 3', 'Session 3'),
+        ('Session 4', 'Session 4'),
     ]
 
     subject = models.CharField(max_length=100)
     date = models.DateField()
-    session = models.CharField(
-        max_length=20,
-        choices=SESSION_CHOICES,
-        default='Session 1'
-    )
-
+    session = models.CharField(max_length=20, choices=SESSION_CHOICES)
     start_time = models.TimeField(null=True, blank=True)
+
     def __str__(self):
         return f"{self.subject} - {self.date} - {self.session}"
 
 
-
 class Hall(models.Model):
-    hall_no = models.CharField(max_length=20)
+    hall_no = models.CharField(max_length=20, unique=True)
+
     def __str__(self):
         return self.hall_no
 
@@ -83,13 +81,7 @@ class Attendance(models.Model):
     def __str__(self):
         return f"{self.student.reg_no} - {self.status}"
 
-from django.contrib.auth.models import User
 
-from django.db import models
-from django.contrib.auth.models import User
-
-
-# Invigilator linked to Django User
 class Invigilator(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=True, blank=True)
@@ -98,12 +90,11 @@ class Invigilator(models.Model):
         return self.name if self.name else self.user.username
 
 
-# Hall assignment model
 class HallAssignment(models.Model):
     invigilator = models.ForeignKey(Invigilator, on_delete=models.CASCADE)
-    hall = models.CharField(max_length=50)
+    hall = models.ForeignKey(Hall, on_delete=models.CASCADE) 
     date = models.DateField()
-    session = models.CharField(max_length=10)  # FN / AN
+    session = models.CharField(max_length=20)
 
     def __str__(self):
         return f"{self.invigilator} - {self.hall} ({self.date} {self.session})"

@@ -1,43 +1,32 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.http import HttpResponse
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
-import openpyxl
-from datetime import datetime
-from django.contrib.auth.models import User
-from django.shortcuts import render
-from django.http import HttpResponse
-from .models import Invigilator, HallAssignment
 from django.utils import timezone
 from datetime import datetime, timedelta
-
-from .models import (
-    Year,
-    Branch,
-    Section,
-    Hall,
-    Exam,
-    Student,
-    Attendance,
-    Invigilator
-)
-
 import openpyxl
-from datetime import datetime
 
+from django.contrib.auth.models import User
+from .models import (
+    Year, Branch, Section, Hall, Exam,
+    Student, Attendance, Invigilator, HallAssignment
+)
 from .forms import LoginForm
 
-def invigilator_login(request):
 
+
+
+def invigilator_login(request):
     if request.method == "POST":
         form = LoginForm(request.POST)
 
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password']
-
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(
+                request,
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password']
+            )
 
             if user and Invigilator.objects.filter(user=user).exists():
                 login(request, user)
@@ -47,19 +36,19 @@ def invigilator_login(request):
                 'form': form,
                 'error': "Invalid credentials"
             })
-
     else:
         form = LoginForm()
 
     return render(request, 'exam/invigilator_login.html', {'form': form})
 
+
 def admin_login(request):
-
     if request.method == "POST":
-        username = request.POST.get("username")
-        password = request.POST.get("password")
-
-        user = authenticate(request, username=username, password=password)
+        user = authenticate(
+            request,
+            username=request.POST.get("username"),
+            password=request.POST.get("password")
+        )
 
         if user and user.is_staff:
             login(request, user)
@@ -71,24 +60,39 @@ def admin_login(request):
 
     return render(request, 'exam/admin_login.html')
 
+
+
+
 @login_required
 def invigilator_dashboard(request):
     invigilator = get_object_or_404(Invigilator, user=request.user)
-    halls = invigilator.halls.all()
+
+    assignments = HallAssignment.objects.filter(invigilator=invigilator)
 
     return render(request, 'exam/dashboard.html', {
-        'halls': halls
+        'assignments': assignments
     })
 
+
+
 @login_required
-def takeAttendance(request, hall_id):
+def takeAttendance(request, hall_no):
+    hall = get_object_or_404(Hall, hall_no=hall_no)
 
-    hall = get_object_or_404(Hall, id=hall_id)
 
-    # Get students of this hall
+    if not request.user.is_staff:
+        invigilator = get_object_or_404(Invigilator, user=request.user)
+
+        assigned = HallAssignment.objects.filter(
+            invigilator=invigilator,
+            hall=hall
+        ).exists()
+
+        if not assigned:
+            return redirect('invigilator_dashboard')
+
     students_qs = Student.objects.filter(hall=hall)
 
-    # If no students assigned
     if not students_qs.exists():
         return render(request, 'exam/takeAttendance.html', {
             'students': [],
@@ -96,10 +100,8 @@ def takeAttendance(request, hall_id):
             'is_locked': False
         })
 
-    # Get exam from first student
     exam = students_qs.first().exam
 
-    # Lock logic
     if exam.start_time:
         exam_datetime = datetime.combine(exam.date, exam.start_time)
         exam_datetime = timezone.make_aware(exam_datetime)
@@ -108,20 +110,12 @@ def takeAttendance(request, hall_id):
     else:
         is_locked = False
 
-    # Invigilator permission check
-    if not request.user.is_staff:
-        invigilator = get_object_or_404(Invigilator, user=request.user)
+    if is_locked:
+        return render(request, 'exam/attendance_locked.html', {
+            'hall': hall,
+            'exam': exam
+        })
 
-        if hall not in invigilator.halls.all():
-            return redirect('invigilator_dashboard')
-
-        if is_locked:
-            return render(request, 'exam/attendance_locked.html', {
-                'hall': hall,
-                'exam': exam
-            })
-
-    # Existing attendance
     existing = Attendance.objects.filter(student__in=students_qs)
 
     attendance_map = {
@@ -139,8 +133,7 @@ def takeAttendance(request, hall_id):
             "status": attendance_map.get(s.id, "Present")
         })
 
-    # Save attendance
-    if request.method == "POST" and not is_locked:
+    if request.method == "POST":
         for s in students_qs:
             status = request.POST.get(s.reg_no, "Present")
 
@@ -156,20 +149,19 @@ def takeAttendance(request, hall_id):
         'hall': hall,
         'is_locked': is_locked
     })
+
+
 def success(request):
     return render(request, 'exam/success.html')
 
 
 @staff_member_required
 def admin_dashboard(request):
-
     exams = Exam.objects.all()
     selected_exam_id = request.GET.get("exam")
 
     records = Attendance.objects.select_related(
-        'student',
-        'student__exam',
-        'student__hall'
+        'student', 'student__exam', 'student__hall'
     )
 
     if selected_exam_id:
@@ -183,15 +175,107 @@ def admin_dashboard(request):
 
 
 @staff_member_required
-def section_wise_absentees(request, exam_id):
+def upload_students(request):
+    if request.method == "POST":
+        file = request.FILES['file']
+        wb = openpyxl.load_workbook(file)
+        ws = wb.active
 
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if not row or not row[0]:
+                continue
+
+            reg_no, name, year_name, branch_name, section_name, hall_name, subject, date, session = row
+
+            if isinstance(date, datetime):
+                date = date.date()
+
+            year, _ = Year.objects.get_or_create(year_name=str(year_name).strip())
+            branch, _ = Branch.objects.get_or_create(branch_name=str(branch_name).strip())
+
+            section, _ = Section.objects.get_or_create(
+                section_name=str(section_name).strip(),
+                year=year,
+                branch=branch
+            )
+
+            hall, _ = Hall.objects.get_or_create(hall_no=str(hall_name).strip())
+
+            exam, _ = Exam.objects.get_or_create(
+                subject=str(subject).strip(),
+                date=date,
+                session=str(session).strip()
+            )
+
+            Student.objects.update_or_create(
+                reg_no=str(reg_no).strip(),
+                defaults={
+                    'name': name,
+                    'year': year,
+                    'branch': branch,
+                    'section': section,
+                    'hall': hall,
+                    'exam': exam
+                }
+            )
+
+        return redirect('admin_dashboard')
+
+    return render(request, 'exam/upload.html')
+
+
+@staff_member_required
+def upload_invigilators(request):
+    if request.method == "POST":
+        file = request.FILES['file']
+        wb = openpyxl.load_workbook(file)
+        ws = wb.active
+
+        for row in ws.iter_rows(min_row=2, values_only=True):
+            if not row or not row[0]:
+                continue
+
+            username, hall_name, date, session = row
+
+            if isinstance(date, datetime):
+                date = date.date()
+
+            username = str(username).strip()
+
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                continue
+
+            invigilator, _ = Invigilator.objects.get_or_create(
+                user=user,
+                defaults={'name': user.first_name or user.username}
+            )
+
+         
+            hall_obj, _ = Hall.objects.get_or_create(
+                hall_no=str(hall_name).strip()
+            )
+
+            HallAssignment.objects.update_or_create(
+                invigilator=invigilator,
+                hall=hall_obj,
+                date=date,
+                session=str(session).strip()
+            )
+
+        return redirect('admin_dashboard')
+
+    return render(request, 'exam/upload_invigilators.html')
+
+@staff_member_required
+def section_wise_absentees(request, exam_id):
     exam = get_object_or_404(Exam, id=exam_id)
 
     sections = Section.objects.all()
     section_data = {}
 
     for section in sections:
-
         absentees = Attendance.objects.filter(
             student__section=section,
             student__exam=exam,
@@ -208,8 +292,7 @@ def section_wise_absentees(request, exam_id):
         'exam': exam
     })
 
-
-@staff_member_required
+staff_member_required
 def export_attendance_excel(request, exam_id):
 
     records = Attendance.objects.filter(
@@ -242,140 +325,3 @@ def export_attendance_excel(request, exam_id):
 
     wb.save(response)
     return response
-
-@staff_member_required
-def upload_students(request):
-
-    if request.method == "POST":
-
-        file = request.FILES['file']
-        wb = openpyxl.load_workbook(file)
-        ws = wb.active
-
-        for row in ws.iter_rows(min_row=2, values_only=True):
-
-            if not row or not row[0]:
-                continue
-
-            reg_no, name, year_name, branch_name, section_name, hall_name, subject, date, session = row
-
-            if isinstance(date, datetime):
-                date = date.date()
-
-            # Create or get Year
-            year, _ = Year.objects.get_or_create(
-                year_name=str(year_name).strip()
-            )
-
-            # Create or get Branch
-            branch, _ = Branch.objects.get_or_create(
-                branch_name=str(branch_name).strip()
-            )
-
-            # Create or get Section
-            section, _ = Section.objects.get_or_create(
-                section_name=str(section_name).strip(),
-                year=year,
-                branch=branch
-            )
-
-            # Create or get Hall
-            hall, _ = Hall.objects.get_or_create(
-                hall_no=str(hall_name).strip()
-            )
-
-            # Create or get Exam
-            exam, _ = Exam.objects.get_or_create(
-                subject=str(subject).strip(),
-                date=date,
-                session=str(session).strip()
-            )
-
-            # Create or update Student
-            Student.objects.update_or_create(
-                reg_no=str(reg_no).strip(),
-                defaults={
-                    'name': name,
-                    'year': year,
-                    'branch': branch,
-                    'section': section,
-                    'hall': hall,
-                    'exam': exam
-                }
-            )
-
-        return redirect('admin_dashboard')
-
-    return render(request, 'exam/upload.html')
-
-from django.contrib.auth import get_user_model
-
-def create_admin(request):
-    User = get_user_model()
-
-    if not User.objects.filter(username="Keerthana").exists():
-        User.objects.create_superuser(
-            username="Keerthana",
-            email="127003181@sastra.ac.in",
-            password="keerthana@256"
-        )
-        return HttpResponse("Admin Created Successfully")
-
-    return HttpResponse("Admin Already Exists")
-
-from django.contrib.admin.views.decorators import staff_member_required
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User
-import openpyxl
-from datetime import datetime
-from .models import Invigilator, HallAssignment
-
-
-@staff_member_required
-def upload_invigilators(request):
-
-    if request.method == "POST":
-
-        file = request.FILES['file']
-        wb = openpyxl.load_workbook(file)
-        ws = wb.active
-
-        for row in ws.iter_rows(min_row=2, values_only=True):
-
-            if not row or not row[0]:
-                continue
-
-            username, hall, date, session = row
-
-            # Convert Excel datetime to date
-            if isinstance(date, datetime):
-                date = date.date()
-
-            username = str(username).strip()
-
-            # Get User (VERY IMPORTANT)
-            try:
-                user = User.objects.get(username=username)
-            except User.DoesNotExist:
-                print(f"User {username} not found, skipping...")
-                continue
-
-            # Create or get Invigilator
-            invigilator, _ = Invigilator.objects.get_or_create(
-                user=user,
-                defaults={'name': user.first_name or user.username}
-            )
-
-            # Create Hall Assignment
-            HallAssignment.objects.update_or_create(
-                invigilator=invigilator,
-                date=date,
-                session=str(session).strip(),
-                defaults={
-                    'hall': str(hall).strip()
-                }
-            )
-
-        return redirect('admin_dashboard')
-
-    return render(request, 'exam/upload_invigilators.html')
