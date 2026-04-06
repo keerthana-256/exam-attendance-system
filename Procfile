@@ -1,1 +1,1 @@
-web: gunicorn attendance.wsgi --workers 1 --threads 2 --timeout 120
+web: python manage.py collectstatic --noinput && gunicorn attendance.wsgi --workers 1 --threads 2 --timeout 120
