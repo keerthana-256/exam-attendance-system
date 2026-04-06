@@ -1,1 +1,1 @@
-web: gunicorn attendance.wsgi
+web: gunicorn attendance.wsgi --workers 1 --threads 2 --timeout 120
