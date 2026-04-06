@@ -1,8 +1,5 @@
-Django==6.0.3
+Django
 gunicorn
-whitenoise
 dj-database-url
 psycopg2-binary
-django-simple-captcha
-openpyxl
-pandas
+whitenoise
