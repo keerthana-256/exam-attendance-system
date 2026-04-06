@@ -1,1 +1,1 @@
-web: python manage.py migrate --noinput && python manage.py collectstatic --noinput && gunicorn attendance.wsgi --workers 1 --threads 2
+web: gunicorn attendance.wsgi --workers 1 --threads 2

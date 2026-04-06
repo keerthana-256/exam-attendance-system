@@ -11,7 +11,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-fallback-key')
-DEBUG = True
+DEBUG = False
 ALLOWED_HOSTS = ['*']
 
 # CSRF (important for Railway)
@@ -26,7 +26,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'exam',
-    'captcha',
 ]
 
 # Middleware
@@ -47,7 +46,7 @@ ROOT_URLCONF = 'attendance.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],  # add templates folder here if you have one
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # add templates folder here if you have one
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
