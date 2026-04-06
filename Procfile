@@ -1,1 +1,1 @@
-web: gunicorn exam-attendance-system.wsgi 
+web: gunicorn attendance.wsgi 
