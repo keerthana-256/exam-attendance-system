@@ -101,3 +101,7 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # Default primary key
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+import os
+if os.environ.get("RAILWAY_ENVIRONMENT"):
+    import subprocess
+    subprocess.run(["python", "manage.py", "migrate"])
