@@ -325,3 +325,19 @@ def export_attendance_excel(request, exam_id):
 
     wb.save(response)
     return response
+
+
+def create_admin(request):
+    from django.contrib.auth.models import User
+    from django.http import HttpResponse
+
+    if not User.objects.filter(username="Keerthana").exists():
+        User.objects.create_superuser("Keerthana", "keerthanapasuparthi@gmail.com", "keerthana@256")
+    return HttpResponse("Admin created")
+
+from django.http import HttpResponse
+from django.core.management import call_command
+
+def run_migrations(request):
+    call_command('migrate')
+    return HttpResponse("Migrations done")

@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from.views import run_migrations
 
 urlpatterns = [
 
@@ -18,4 +19,5 @@ urlpatterns = [
 
     path('upload/', views.upload_students, name='upload_students'),
     path('upload_invigilators/', views.upload_invigilators, name='upload_invigilators'),
+    path('run_migrations/',run_migrations),
 ]
