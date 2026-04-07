@@ -20,4 +20,5 @@ urlpatterns = [
     path('upload/', views.upload_students, name='upload_students'),
     path('upload_invigilators/', views.upload_invigilators, name='upload_invigilators'),
     path('run_migrations/',run_migrations),
+    path('create-admin/', views.create_admin),
 ]

@@ -326,10 +326,10 @@ def export_attendance_excel(request, exam_id):
     wb.save(response)
     return response
 
+from django.contrib.auth.models import User
+from django.http import HttpResponse
 
 def create_admin(request):
-    from django.contrib.auth.models import User
-    from django.http import HttpResponse
 
     if not User.objects.filter(username="Keerthana").exists():
         User.objects.create_superuser("Keerthana", "keerthanapasuparthi@gmail.com", "keerthana@256")
